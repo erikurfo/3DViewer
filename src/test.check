@@ -1,0 +1,93 @@
+#include <limits.h>
+
+#include "parser.h"
+
+#test pars_and_move_test
+char filename[] = "cube.obj";
+data_t file_data = parser(filename);
+double v_array[] = {0, 0, 0, 1.5, 0, 0, 1.5, 1.5, 0, 0, 1.5, 0, 0, 0, 1.5, 1.5, 0, 1.5, 1.5, 1.5, 1.5, 0, 1.5, 1.5};
+double *v = calloc((file_data.count_of_vertexes * 3), sizeof(double));
+unsigned int v_size = vs_array(file_data, v);
+for (unsigned int i = 0; i < v_size; i++) {
+    ck_assert_double_eq(v_array[i], v[i]);
+}
+unsigned int f_array[] = {1, 2, 2, 3, 3, 4, 4, 1, 5, 6, 6, 7, 7, 8, 8, 5, 1, 5, 5, 1, 2, 6, 6, 2, 7, 3, 3, 4, 4, 8, 8, 7};
+unsigned int *f = calloc(fs_size(file_data), sizeof(int));
+fs_array(file_data, f);
+unsigned int f_size = fs_size(file_data);
+for (unsigned int i = 0; i < f_size; i++) {
+    ck_assert_double_eq(f_array[i], f[i] + 1);
+}
+move_x(v, 1, v_size);
+move_y(v, 1, v_size);
+move_z(v, 1, v_size);
+for (unsigned int i = 0; i < v_size; i++) {
+    v_array[i] = v_array[i] + 1;
+}
+for (unsigned int i = 0; i < v_size; i++) {
+    ck_assert_double_eq_tol(v_array[i], v[i], 7);
+}
+free(v);
+free(f);
+for (unsigned int i = 0; i < file_data.count_of_facets; i++)
+    free(file_data.polygons[i].vertexes);
+free(file_data.polygons);
+s21_remove_matrix(&file_data.matrix_3d);
+
+#test rotation_test_1
+char filename[] = "cube.obj";
+data_t file_data = parser(filename);
+double v_array[] = {0, 0, 0, 1.5, 0, 0, 1.5, 1.5, 0, 0, 1.5, 0, 0, 0, 1.5, 1.5, 0, 1.5, 1.5, 1.5, 1.5, 0, 1.5, 1.5};
+double *v = calloc((file_data.count_of_vertexes * 3), sizeof(double));
+unsigned int v_size = vs_array(file_data, v);
+rotation_by_oy(v, 360, v_size);
+rotation_by_ox(v, 360, v_size);
+rotation_by_oz(v, 360, v_size);
+for (unsigned int i = 0; i < v_size; i++) {
+    ck_assert_double_eq_tol(v_array[i], v[i], 7);
+}
+free(v);
+for (unsigned int i = 0; i < file_data.count_of_facets; i++)
+    free(file_data.polygons[i].vertexes);
+free(file_data.polygons);
+s21_remove_matrix(&file_data.matrix_3d);
+
+#test rotation_test_2
+char filename[] = "cube.obj";
+data_t file_data = parser(filename);
+double v_array[] = {0, 0, 0, 1.5, 0, 0, 1.5, 1.5, 0, 0, 1.5, 0, 0, 0, 1.5, 1.5, 0, 1.5, 1.5, 1.5, 1.5, 0, 1.5, 1.5};
+double *v = calloc((file_data.count_of_vertexes * 3), sizeof(double));
+unsigned int v_size = vs_array(file_data, v);
+rotation_by_ox(v, 180, v_size);
+rotation_by_oy(v, 180, v_size);
+rotation_by_oz(v, 180, v_size);
+for (unsigned int i = 0; i < v_size; i++) {
+    v_array[i] = -v_array[i];
+}
+for (unsigned int i = 0; i < v_size; i++) {
+    ck_assert_double_eq_tol(v_array[i], v[i], 7);
+}
+free(v);
+for (unsigned int i = 0; i < file_data.count_of_facets; i++)
+    free(file_data.polygons[i].vertexes);
+free(file_data.polygons);
+s21_remove_matrix(&file_data.matrix_3d);
+
+#test scale_test
+char filename[] = "cube.obj";
+data_t file_data = parser(filename);
+double v_array[] = {0, 0, 0, 1.5, 0, 0, 1.5, 1.5, 0, 0, 1.5, 0, 0, 0, 1.5, 1.5, 0, 1.5, 1.5, 1.5, 1.5, 0, 1.5, 1.5};
+double *v = calloc((file_data.count_of_vertexes * 3), sizeof(double));
+unsigned int v_size = vs_array(file_data, v);
+scale(v, 3.3, v_size);
+for (unsigned int i = 0; i < v_size; i++) {
+    v_array[i] = 3.3 * v_array[i];
+}
+for (unsigned int i = 0; i < v_size; i++) {
+    ck_assert_double_eq(v_array[i], v[i]);
+}
+free(v);
+for (unsigned int i = 0; i < file_data.count_of_facets; i++)
+    free(file_data.polygons[i].vertexes);
+free(file_data.polygons);
+s21_remove_matrix(&file_data.matrix_3d);
